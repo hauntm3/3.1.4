@@ -12,7 +12,6 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
-@Transactional
 public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
@@ -28,30 +27,22 @@ public class UserServiceImpl implements UserService {
         return userRepository.findAll();
     }
 
+    @Transactional
     @Override
     public User add(User user) {
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         return userRepository.save(user);
     }
 
+    @Transactional
     @Override
     public void update(User updatedUser) {
-        User user = readUser(updatedUser.getId()).get();
-        String newPassword = updatedUser.getPassword();
+        updatedUser.setPassword(passwordEncoder.encode(updatedUser.getPassword()));
 
-        if (!newPassword.equals(user.getPassword()) && !newPassword.isEmpty()) {
-            updatedUser.setPassword(passwordEncoder.encode(newPassword));
-        } else {
-            updatedUser.setPassword(user.getPassword());
-        }
         userRepository.save(updatedUser);
     }
 
-    @Override
-    public Optional<User> readUser(Long id) {
-        return userRepository.findById(id);
-    }
-
+    @Transactional
     @Override
     public void delete(Long id) {
         userRepository.deleteById(id);
